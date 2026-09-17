@@ -36,6 +36,11 @@ pins. Roll back by restoring a previously verified pin through a normal pull
 request, then verify the resulting deployment. Never force-push or bypass branch
 protection for a website update.
 
+Google Search Console ownership files live in `verification/` as publication
+configuration. The build copies the verification file to the site root, and the
+live check verifies its contents after deployment. Keep the file published after
+verification succeeds so ownership remains valid.
+
 The matching workflow and helper templates live in
 [`website/deployment`](https://github.com/Xpounder-com/hormuz/tree/main/website/deployment)
 in the product repository. See its
