@@ -65,6 +65,8 @@ jobs:
         run: npm run verify
       - name: Include the validated public source pin in the artifact
         run: cp site-source.json product/website/out/site-source.json
+      - name: Include Google Search Console ownership verification
+        run: cp verification/googlede76ed201f5cf6d4.html product/website/out/
       - name: Upload the verified root-site artifact
         if: github.repository == 'usehormuz/usehormuz.github.io' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4

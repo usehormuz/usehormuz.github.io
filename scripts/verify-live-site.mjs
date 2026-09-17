@@ -7,6 +7,7 @@ import { validateSourcePin } from './verify-source-pin.mjs';
 export const LIVE_ORIGIN = 'https://usehormuz.github.io';
 export const LIVE_ROUTES = Object.freeze(['/', '/docs/', '/demo/', '/integrations/', '/enterprise/', '/security/', '/resources/', '/contact/', '/privacy/', '/brand/', '/guides/team-ai-budgets/', '/guides/codex-claude-code-gateway/']);
 export const LIVE_DOWNLOADS = Object.freeze(['hormuz-overview.pdf', 'hormuz-pilot-brief.pdf', 'hormuz-trust-brief.pdf', 'hormuz-buyer-briefing.pptx']);
+export const LIVE_VERIFICATION_FILES = Object.freeze(['googlede76ed201f5cf6d4.html']);
 
 export async function verifyLiveSite(sourcePin, fetcher = fetch) {
   const revision = validateSourcePin(sourcePin);
@@ -28,6 +29,11 @@ export async function verifyLiveSite(sourcePin, fetcher = fetch) {
   try { publishedRevision = validateSourcePin(await manifest.json()); }
   catch { throw new Error('Invalid public source manifest'); }
   assert.equal(publishedRevision, revision, 'Published source revision does not match the reviewed pin');
+
+  for (const name of LIVE_VERIFICATION_FILES) {
+    const token = await (await request(`/${name}`)).text();
+    assert.equal(token.trim(), `google-site-verification: ${name}`, `Ownership verification mismatch: ${name}`);
+  }
 
   for (const route of LIVE_ROUTES) {
     const html = await (await request(route)).text();
