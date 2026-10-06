@@ -47,4 +47,17 @@ in the product repository. See its
 [`website/README.md`](https://github.com/Xpounder-com/hormuz/blob/main/website/README.md)
 for compatibility redirects and the initial two-phase migration.
 
+## Workspace entry point
+
+The `/workspace/` page links to the authenticated Render dashboard when the
+public repository variable `HORMUZ_DASHBOARD_ORIGIN` is configured. Set only the
+canonical HTTPS backend origin after its customer sign-in and exact OIDC
+callback have been verified. This variable is public and must contain no
+credential, path, query, or fragment. Leave it unset while preparing signup;
+the page then reports that sign-in is being prepared.
+
+GitHub Pages hosts the static entry page. Customer cookies, account state, and
+custom-domain connections remain on the Render backend. See the product's
+`WORKSPACE_ADDRESSES.md` for configuration, migration, and acceptance details.
+
 Maintainer: Mehrdad Zaker. Licensed under the existing Apache-2.0 license.
