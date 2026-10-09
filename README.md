@@ -21,7 +21,9 @@ configuration. It does not duplicate or transfer the product repository.
 The build installs locked website dependencies and checks routes, privacy,
 recordings, claims, types, links, metadata, and downloads. The public
 `/site-source.json` identifies the source commit included in the deployed
-artifact. Post-deploy verification checks that pin and the live static site;
+artifact. The validated revision is also passed to the build and export verifier
+as `NEXT_PUBLIC_HORMUZ_SOURCE_REVISION`, so source-document links identify the
+same immutable commit instead of depending on an unmerged product main branch. Post-deploy verification checks that pin and the live static site;
 it is not a substitute for interactive or document-layout QA.
 
 ## Publication boundaries
