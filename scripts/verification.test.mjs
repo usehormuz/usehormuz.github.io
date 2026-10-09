@@ -19,7 +19,7 @@ function publishedSite() {
   bodies.set('/demo/', bodies.get('/demo/') + '<section id="work-demo"><video src="/demo/ai-work-demo.webm"></video></section>');
   bodies.set('/evidence/', bodies.get('/evidence/') + '<section id="work-proof"><a href="/downloads/ai-work-proof.json">Receipt</a></section>');
   for (const [route, sources] of Object.entries(LIVE_SOURCE_LINKS)) bodies.set(route, bodies.get(route) + sources.map(source => `<a href="https://github.com/${pin.repository}/blob/${pin.revision}/${source}">Source</a>`).join(''));
-  bodies.set('/docs/', bodies.get('/docs/') + `<section id="examples"><pre><code>git checkout ${pin.revision}\npython tools/ai_work_provider_examples.py</code></pre></section><pre><code>python -m pip install 'hormuz[client,context] @ git+https://github.com/${pin.repository}.git@${pin.revision}'</code></pre>`);
+  bodies.set('/docs/', bodies.get('/docs/') + `<section id="examples"><pre><code>git checkout --detach ${pin.revision}\npython tools/ai_work_provider_examples.py</code></pre></section><pre><code>python -m pip install 'hormuz[client,context] @ git+https://github.com/${pin.repository}.git@${pin.revision}'</code></pre>`);
   for (const name of LIVE_DOWNLOADS) bodies.set(`/downloads/${name}`, name.endsWith('.pdf') ? '%PDF-fixture' : name.endsWith('.json') ? JSON.stringify({ schema_id: 'hormuz.ai-work-proof', schema_version: 1, conditions: { real_provider_calls: 0, real_payments: 0, customer_savings_validated: false, production_quality_validated: false }, checks: [{ check: 'synthetic_verifier_fixture', passed: true }] }) : Buffer.from([0x50, 0x4b, 0x03, 0x04, 0]));
   const requests = [];
   return {
@@ -100,7 +100,11 @@ test('the example entry, checkout and all four trial guides must be published at
   for (const [route, from, to] of [
     ['/', 'href="/docs/#examples"', 'href="/docs/"'],
     ['/docs/', 'id="examples"', 'id="old-setup"'],
-    ['/docs/', `git checkout ${pin.revision}`, 'git checkout main'],
+    ['/docs/', `git checkout --detach ${pin.revision}`, 'git checkout --detach main'],
+    ['/docs/', `git checkout --detach ${pin.revision}`, `git checkout --detach ${'0'.repeat(40)}`],
+    ['/docs/', `git checkout --detach ${pin.revision}`, `git checkout --track ${pin.revision}`],
+    ['/docs/', `git checkout --detach ${pin.revision}`, `git checkout --detach ${pin.revision} --track`],
+    ['/docs/', `git checkout --detach ${pin.revision}`, `git checkout --detach ${pin.revision}0`],
     ...['examples/providers/README.md', 'examples/sdk/README.md', 'docs/AI_WORK_DELIVERY_EXAMPLES.md', 'docs/TRY_HORMUZ.md'].map(source => ['/docs/', `https://github.com/${pin.repository}/blob/${pin.revision}/${source}`, '#missing-guide']),
   ]) {
     const site = publishedSite();

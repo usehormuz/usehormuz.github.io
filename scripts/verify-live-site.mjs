@@ -60,7 +60,8 @@ export async function verifyLiveSite(sourcePin, fetcher = fetch, { dashboardOrig
     if (route === '/docs/') {
       assert.ok(html.includes('id="examples"'), 'Published docs are missing the example destination');
       assert.ok([...html.matchAll(/<pre\b[^>]*>[\s\S]*?<\/pre>/g)].some(([block]) => block.includes(`git+https://github.com/${sourcePin.repository}.git@${revision}`)), 'Published candidate installation does not match the reviewed pin');
-      assert.ok([...html.matchAll(/<pre\b[^>]*>[\s\S]*?<\/pre>/g)].some(([block]) => block.includes(`git checkout ${revision}`) && block.includes('python tools/ai_work_provider_examples.py')), 'Published example checkout does not match the reviewed pin');
+      const checkout = new RegExp(`(?:^|[>\\n])git checkout --detach ${revision}(?=[<\\n]|$)`);
+      assert.ok([...html.matchAll(/<pre\b[^>]*>[\s\S]*?<\/pre>/g)].some(([block]) => checkout.test(block) && block.includes('python tools/ai_work_provider_examples.py')), 'Published example checkout does not match the reviewed pin');
     }
     if (route === '/work/' && workDestination) assert.ok(html.includes(`href="${workDestination}"`), 'Published AI Work entry does not point to the configured gateway');
     if (route === '/demo/') assert.ok(html.includes('id="work-demo"') && html.includes('/demo/ai-work-demo.webm'), 'Published demo is missing the actual work recording');
