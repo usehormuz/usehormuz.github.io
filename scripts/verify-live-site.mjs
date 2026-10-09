@@ -9,7 +9,7 @@ export const LIVE_ROUTES = Object.freeze(['/', '/plans/', '/docs/', '/demo/', '/
 export const LIVE_DOWNLOADS = Object.freeze(['hormuz-overview.pdf', 'hormuz-appliance-brief.pdf', 'hormuz-trust-brief.pdf', 'hormuz-buyer-briefing.pptx', 'ai-work-proof.json']);
 export const LIVE_VERIFICATION_FILES = Object.freeze(['googlede76ed201f5cf6d4.html']);
 export const LIVE_SOURCE_LINKS = Object.freeze({
-  '/docs/': ['docs/AI_WORK_AGENT_INTEGRATION.md', 'docs/AI_WORK_RUNTIME.md'],
+  '/docs/': ['docs/AI_WORK_AGENT_INTEGRATION.md', 'docs/AI_WORK_RUNTIME.md', 'examples/providers/README.md', 'examples/sdk/README.md', 'docs/AI_WORK_DELIVERY_EXAMPLES.md', 'docs/TRY_HORMUZ.md'],
   '/evidence/': ['tools/ai_work_proof.py'],
   '/demo/': ['website/scripts/ai-work-browser-qa.mjs'],
 });
@@ -56,7 +56,12 @@ export async function verifyLiveSite(sourcePin, fetcher = fetch, { dashboardOrig
     for (const [, linkedRevision] of html.matchAll(/<a\b[^>]*\bhref="https:\/\/github\.com\/Xpounder-com\/hormuz\/blob\/([^/]+)\//g)) {
       assert.equal(linkedRevision, revision, `Published source link does not match the reviewed pin: ${route}`);
     }
-    if (route === '/docs/') assert.ok([...html.matchAll(/<pre\b[^>]*>[\s\S]*?<\/pre>/g)].some(([block]) => block.includes(`git+https://github.com/${sourcePin.repository}.git@${revision}`)), 'Published candidate installation does not match the reviewed pin');
+    if (route === '/') assert.ok(html.includes('href="/docs/#examples"'), 'Published homepage is missing the example entry');
+    if (route === '/docs/') {
+      assert.ok(html.includes('id="examples"'), 'Published docs are missing the example destination');
+      assert.ok([...html.matchAll(/<pre\b[^>]*>[\s\S]*?<\/pre>/g)].some(([block]) => block.includes(`git+https://github.com/${sourcePin.repository}.git@${revision}`)), 'Published candidate installation does not match the reviewed pin');
+      assert.ok([...html.matchAll(/<pre\b[^>]*>[\s\S]*?<\/pre>/g)].some(([block]) => block.includes(`git checkout ${revision}`) && block.includes('python tools/ai_work_provider_examples.py')), 'Published example checkout does not match the reviewed pin');
+    }
     if (route === '/work/' && workDestination) assert.ok(html.includes(`href="${workDestination}"`), 'Published AI Work entry does not point to the configured gateway');
     if (route === '/demo/') assert.ok(html.includes('id="work-demo"') && html.includes('/demo/ai-work-demo.webm'), 'Published demo is missing the actual work recording');
     if (route === '/evidence/') assert.ok(html.includes('id="work-proof"') && html.includes('/downloads/ai-work-proof.json'), 'Published evidence is missing the executed work receipt');
