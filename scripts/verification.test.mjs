@@ -15,10 +15,11 @@ function publishedSite() {
   ]);
   for (const name of LIVE_VERIFICATION_FILES) bodies.set(`/${name}`, `google-site-verification: ${name}`);
   for (const route of LIVE_ROUTES) bodies.set(route, `<link rel="canonical" href="${LIVE_ORIGIN}${route}"/><h1>Hormuz</h1>`);
+  bodies.set('/', bodies.get('/') + '<a href="/docs/#examples">Try the examples</a>');
   bodies.set('/demo/', bodies.get('/demo/') + '<section id="work-demo"><video src="/demo/ai-work-demo.webm"></video></section>');
   bodies.set('/evidence/', bodies.get('/evidence/') + '<section id="work-proof"><a href="/downloads/ai-work-proof.json">Receipt</a></section>');
   for (const [route, sources] of Object.entries(LIVE_SOURCE_LINKS)) bodies.set(route, bodies.get(route) + sources.map(source => `<a href="https://github.com/${pin.repository}/blob/${pin.revision}/${source}">Source</a>`).join(''));
-  bodies.set('/docs/', bodies.get('/docs/') + `<pre><code>python -m pip install 'hormuz[client,context] @ git+https://github.com/${pin.repository}.git@${pin.revision}'</code></pre>`);
+  bodies.set('/docs/', bodies.get('/docs/') + `<section id="examples"><pre><code>git checkout ${pin.revision}\npython tools/ai_work_provider_examples.py</code></pre></section><pre><code>python -m pip install 'hormuz[client,context] @ git+https://github.com/${pin.repository}.git@${pin.revision}'</code></pre>`);
   for (const name of LIVE_DOWNLOADS) bodies.set(`/downloads/${name}`, name.endsWith('.pdf') ? '%PDF-fixture' : name.endsWith('.json') ? JSON.stringify({ schema_id: 'hormuz.ai-work-proof', schema_version: 1, conditions: { real_provider_calls: 0, real_payments: 0, customer_savings_validated: false, production_quality_validated: false }, checks: [{ check: 'synthetic_verifier_fixture', passed: true }] }) : Buffer.from([0x50, 0x4b, 0x03, 0x04, 0]));
   const requests = [];
   return {
@@ -92,6 +93,19 @@ test('missing routes, wrong canonicals, HTML downloads, and incomplete metadata 
     const site = publishedSite();
     if (replacement === undefined) site.bodies.delete(route); else site.bodies.set(route, replacement);
     await assert.rejects(verifyLiveSite(pin, site.fetcher));
+  }
+});
+
+test('the example entry, checkout and all four trial guides must be published at the reviewed revision', async () => {
+  for (const [route, from, to] of [
+    ['/', 'href="/docs/#examples"', 'href="/docs/"'],
+    ['/docs/', 'id="examples"', 'id="old-setup"'],
+    ['/docs/', `git checkout ${pin.revision}`, 'git checkout main'],
+    ...['examples/providers/README.md', 'examples/sdk/README.md', 'docs/AI_WORK_DELIVERY_EXAMPLES.md', 'docs/TRY_HORMUZ.md'].map(source => ['/docs/', `https://github.com/${pin.repository}/blob/${pin.revision}/${source}`, '#missing-guide']),
+  ]) {
+    const site = publishedSite();
+    site.bodies.set(route, site.bodies.get(route).replace(from, to));
+    await assert.rejects(verifyLiveSite(pin, site.fetcher), /example|source link does not match/);
   }
 });
 
