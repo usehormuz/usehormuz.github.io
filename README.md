@@ -21,7 +21,9 @@ configuration. It does not duplicate or transfer the product repository.
 The build installs locked website dependencies and checks routes, privacy,
 recordings, claims, types, links, metadata, and downloads. The public
 `/site-source.json` identifies the source commit included in the deployed
-artifact. Post-deploy verification checks that pin and the live static site;
+artifact. The validated revision is also passed to the build and export verifier
+as `NEXT_PUBLIC_HORMUZ_SOURCE_REVISION`, so source-document links identify the
+same immutable commit instead of depending on an unmerged product main branch. Post-deploy verification checks that pin and the live static site;
 it is not a substitute for interactive or document-layout QA.
 
 ## Publication boundaries
@@ -46,6 +48,10 @@ The matching workflow and helper templates live in
 in the product repository. See its
 [`website/README.md`](https://github.com/Xpounder-com/hormuz/blob/main/website/README.md)
 for compatibility redirects and the initial two-phase migration.
+This publication repository deliberately adds its existing Search Console
+ownership file, the corresponding live check, and publication-specific regression
+tests to those general templates. Keep these additions when refreshing a template;
+they do not change the pinned product source.
 
 ## Workspace entry point
 
@@ -61,3 +67,19 @@ custom-domain connections remain on the Render backend. See the product's
 `WORKSPACE_ADDRESSES.md` for configuration, migration, and acceptance details.
 
 Maintainer: Mehrdad Zaker. Licensed under the existing Apache-2.0 license.
+
+## AI Work entry and mechanics evidence
+
+The static `/work/` entry uses the same reviewed public
+`HORMUZ_DASHBOARD_ORIGIN` variable to open the authenticated gateway `/work`
+page. Leave the variable unset until that deployment is qualified. Public
+campaign labels cross this boundary only after optional consent and a separate
+authenticated confirmation. No task or credential belongs in this variable.
+
+The publication check verifies sixteen canonical routes, five buyer downloads,
+the actual work recording on `/demo/`, and the executed receipt on `/evidence/`.
+When a gateway origin is configured it checks the published destination without
+contacting the private backend. Source fingerprints and declared synthetic
+conditions remain part of the product build checks. Synthetic provider, billing,
+and signed workflow fixtures do not prove paid-provider savings, live payment,
+customer results, or deployment qualification.

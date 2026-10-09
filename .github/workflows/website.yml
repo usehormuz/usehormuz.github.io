@@ -30,6 +30,8 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "24"
+      - name: Check publication configuration and ownership boundaries
+        run: node --test scripts/verification.test.mjs
       - name: Validate the reviewed source pin
         id: source
         run: node scripts/verify-source-pin.mjs
@@ -57,12 +59,16 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Build the canonical root export
         working-directory: product/website
+        env:
+          NEXT_PUBLIC_HORMUZ_SOURCE_REVISION: ${{ steps.source.outputs.revision }}
         run: npm run build
       - name: Type-check the website
         working-directory: product/website
         run: npm run typecheck
       - name: Verify links, assets, canonicals, and downloads
         working-directory: product/website
+        env:
+          NEXT_PUBLIC_HORMUZ_SOURCE_REVISION: ${{ steps.source.outputs.revision }}
         run: npm run verify
       - name: Include the validated public source pin in the artifact
         run: cp site-source.json product/website/out/site-source.json
@@ -93,6 +99,8 @@ jobs:
     name: Verify live website
     if: github.repository == 'usehormuz/usehormuz.github.io' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: deploy
+    env:
+      HORMUZ_DASHBOARD_ORIGIN: ${{ vars.HORMUZ_DASHBOARD_ORIGIN }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
